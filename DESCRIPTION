@@ -1,0 +1,15 @@
+Package: TradingTools
+Type: Package
+Title: Trading/Investing Tools
+Version: 0.1.0
+Author: Martin Bel
+Maintainer: Martin Bel <m4rbel@gmail.com>
+Description: Practical tools to simplify trading and investing.
+License: GMT-3
+Encoding: UTF-8
+LazyData: true
+Depends: 
+    xts, quantmod, data.table, PerformanceAnalytics, TTR
+Imports:
+    xts, quantmod, data.table, PerformanceAnalytics, TTR
+RoxygenNote: 7.1.1
