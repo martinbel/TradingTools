@@ -28,8 +28,8 @@ mean_reversion <- function(data, ticker){
   df = tail(df, 1)
 
   dt = as.data.table(df)
-  dt[, ticker:=ticker]
-  setnames(dt, "index", "date")
+  dt = cbind(ticker, dt)
+  dt[, index:=NULL]
 
   dt
 }

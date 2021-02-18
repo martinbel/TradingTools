@@ -1,6 +1,6 @@
 #' @title Most common performance metrics
 #'
-#' @param ret_mat is the daily return matrix
+#' @param ret_mat The daily returns matrix
 #' @param date_range A string with an xts style date-range to filter data
 #' @param tickers Character vector with tickers that will be part of the result
 #' @param combine Character vector of tickers to combine in an equal weight portfolio. Results are summarized as Portfolio
@@ -37,8 +37,6 @@ performance <- function(ret_mat,
     portfolio_return = rowMeans(ret_mat[, combine])
     ret_mat$Portfolio = portfolio_return
     tickers = c(tickers, "Portfolio")
-  } else {
-    stop("Include combine tickers")
   }
 
   # compute betas

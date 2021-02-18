@@ -16,7 +16,7 @@ performance(
 )
 }
 \arguments{
-\item{ret_mat}{is the daily return matrix}
+\item{ret_mat}{The daily returns matrix}
 
 \item{date_range}{A string with an xts style date-range to filter data}
 

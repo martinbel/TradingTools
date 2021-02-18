@@ -2,3 +2,4 @@
 *.Rproj
 *.zip
 .Rhistory
+.Rproj.user
