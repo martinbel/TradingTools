@@ -9,7 +9,7 @@ License: GMT-3
 Encoding: UTF-8
 LazyData: true
 Depends: 
-    xts, quantmod, data.table, PerformanceAnalytics, TTR
+    xts, quantmod, data.table, PerformanceAnalytics, TTR, httr
 Imports:
-    xts, quantmod, data.table, PerformanceAnalytics, TTR
+    xts, quantmod, data.table, PerformanceAnalytics, TTR, httr
 RoxygenNote: 7.1.1

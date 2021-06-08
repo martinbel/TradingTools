@@ -29,3 +29,37 @@ list_to_returns <- function(data){
 
   ret
 }
+
+#' @title Gets fundamental data
+#'
+#' @param ticker Stock Ticker
+#' @param element Element
+#' @export
+get_fundamentals <- function(ticker, element){
+  s = paste0(letters[c(26, 1, 3, 11, 19)], collapse="")
+  url = sprintf('https://widget3.%s.com/data/chart/json/%s/%s/www.%s.com', s, ticker, element, s)
+  r = GET(url)
+  lst = content(r, "parsed")
+  nms = names(lst)
+
+  if(element == 'price_and_eps_surprise'){
+    element = 'eps_surprise'
+    l = lst[[4]]
+    df = suppressWarnings(
+      data.table(date=as.Date(names(l), format='%m/%d/%y'),
+                    as.numeric(as.vector(l))))
+  } else {
+    df = suppressWarnings(
+      rbindlist(lapply(lst, function(l){
+      data.table(date=as.Date(names(l), format='%m/%d/%y'),
+                 as.numeric(as.vector(l)))
+    })))
+  }
+
+  df = df[complete.cases(df)]
+  setnames(df, "V2", element)
+  df = unique(df)[order(date)]
+
+  df
+}
+

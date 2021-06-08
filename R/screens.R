@@ -211,3 +211,71 @@ base_stats <- function(data, ticker, trailing_days=8*21){
              vol_end_middle, vol_middle_start, vol_end_start,
              coef_atr=coef_atr)
 }
+
+
+
+#'@title Computes RS among other performance metrics for a given period.
+#'@description The idea is to look for stocks that did well in a given period as the general market is in a correction.
+#'@param data List of price data
+#'@param ticker ticker selected
+#'@param date_range_rs Date range to measure RS
+#'@param date_range_longterm Date range to measure long term performance metrics
+#'@export
+rs_period <- function(data,
+                      ticker,
+                      date_range_rs="2021-02-15/",
+                      date_range_longterm='2015/'){
+
+  df = na.omit(data[[ticker]])
+  n = nrow(df)
+  if (n < 200) {
+    return(NA)
+  }
+  SPY = data[["SPY"]]
+  RSP = data[['RSP']]
+  QQQ = data[['QQQ']]
+
+  ema10 = EMA(Ad(df), n=10)
+  ema20 = EMA(Ad(df), n=20)
+  ema50 = EMA(Ad(df), n=50)
+  sma50 = SMA(Ad(df), n=50)
+  sma200 = SMA(Ad(df), n=200)
+  close = Ad(df)
+
+  R_200 = close[n, 1][[1]]/close[n - 200][[1]] - 1
+  R_60 = close[n, 1][[1]]/close[n - 60][[1]] - 1
+  R_20 = close[n, 1][[1]]/close[n - 20][[1]] - 1
+
+  close_per = close[date_range_rs,]
+  SPY_per = Ad(SPY)[date_range_rs, ]
+  RSP_per = Ad(RSP)[date_range_rs, ]
+  QQQ_per = Ad(QQQ)[date_range_rs, ]
+
+  R_period = tail(close_per, 1)[[1]]/head(close_per, 1)[[1]] -1
+  R_SPY_period = tail(SPY_per, 1)[[1]]/head(SPY_per, 1)[[1]] -1
+  R_RSP_period = tail(RSP_per, 1)[[1]]/head(RSP_per, 1)[[1]] -1
+  R_QQQ_period = tail(QQQ_per, 1)[[1]]/head(QQQ_per, 1)[[1]] -1
+
+  res = data.table(close=tail(close, 1)[[1]],
+                   ema10=tail(ema10, 1)[[1]], ema20=tail(ema20, 1)[[1]],
+                   ema50=tail(ema50, 1)[[1]], sma50=tail(sma50, 1)[[1]],
+                   sma200=tail(sma200, 1)[[1]],
+                   R_200, R_60, R_20, R_period,
+                   R_SPY_period, R_RSP_period, R_QQQ_period)
+
+  res[, close_ema10:=close/ema10-1]
+  res[, close_ema20:=close/ema20-1]
+  res[, close_ema50:=close/ema50-1]
+  res[, close_sma50:=close/sma50-1]
+  res[, close_sma200:=close/sma200-1]
+
+  # Long term performance
+  ret_mat = ROC(close[date_range_longterm], n=1, type='discrete')
+  max_dd = maxDrawdown(ret_mat)
+  cum_return = Return.cumulative(ret_mat)[[1]]
+  tbl = table.AnnualizedReturns(ret_mat)[,1]
+  tbl = data.table(CAGR=tbl[1], Volatility=tbl[2], MaxDrawdown=max_dd,
+                   Sharpe=tbl[3], MAR=tbl[1]/max_dd,
+                   TotalReturn=cum_return)
+  cbind(tbl, res)
+}

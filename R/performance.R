@@ -1,3 +1,47 @@
+#' @title Most common performance metrics for each individual ticker
+#'
+#' @param data Daily price data
+#' @param ticker Selected ticker
+#' @param date_range A string with an xts style date-range to filter data
+#' @param index Benchmark index to compute CAPM Beta and Alpha
+#' @export
+performance_ticker <- function(data, ticker, date_range=NULL, index='SPY'){
+
+  if(is.null(date_range)){
+    date_range='/'
+  }
+
+  # keep complete cases
+  close = Ad(data[[ticker]])
+  ret_index = ROC(Ad(data[[index]]), type='discrete')
+  ret_index = ret_index[complete.cases(ret_index)]
+
+  ret = ROC(close[date_range], n=1, type='discrete')
+  ret = ret[complete.cases(ret)]
+
+  # CAPM
+  R_index = apply.monthly(ret_index, Return.cumulative)
+  Ra = apply.monthly(ret, Return.cumulative)
+  df_capm = merge(Ra, R_index)
+  df_capm = df_capm[complete.cases(df_capm)]
+
+  fit = lm(df_capm[,1] ~ df_capm[,2])
+  coefs = coef(fit)
+
+  # Long term performance
+  max_dd = maxDrawdown(ret)
+  cum_return = Return.cumulative(ret)[[1]]
+  tbl = table.AnnualizedReturns(ret)[,1]
+
+  # Summary table
+  tbl = data.table(ticker, CAGR=tbl[1], Volatility=tbl[2], MaxDrawdown=max_dd,
+                   Sharpe=tbl[3], MAR=tbl[1]/max_dd,
+                   TotalReturn=cum_return,
+                   Beta=coefs[[2]], Alpha=coefs[[1]])
+  tbl
+}
+
+
 #' @title Most common performance metrics
 #'
 #' @param ret_mat The daily returns matrix
